@@ -59,6 +59,19 @@ jobs:
           distribution: 'adoptium'
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: Release ${{ github.ref }}
+          tag_name: ${{ github.ref }}
+          body: |
+            ## What's Changed
+            - Update library version to ${{ github.ref }}
+            - Auto-generated release
+          draft: false
+          prerelease: false
 #      - name: Publish to Maven Central
 #        run: |
 #          echo "Publishing version: ${GITHUB_REF#refs/tags/v}"
@@ -71,14 +84,3 @@ jobs:
 #          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
 #          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
 #          MAVEN_CENTRAL_STAGING_PROFILE_ID: ${{ secrets.MAVEN_CENTRAL_STAGING_PROFILE_ID }}
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          name: Release ${{ github.ref_name }}
-          tag_name: ${{ github.ref_name }}
-          body: |
-            ## What's Changed
-            - Update library version to ${{ github.ref_name }}
-            - Auto-generated release
-          draft: false
-          prerelease: false
