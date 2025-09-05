@@ -29,9 +29,9 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Test Debug
-        run: ./gradlew testDebug
+        run: ./gradlew toast:testDebug
       - name: Test Release
-        run: ./gradlew testRelease
+        run: ./gradlew toast:testRelease
 
   build:
     needs: test
@@ -44,7 +44,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew toast:build
 
   release:
     needs: build
