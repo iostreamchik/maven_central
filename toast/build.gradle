@@ -1,8 +1,10 @@
+import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.maven.publish)
     alias(libs.plugins.signing)
+    alias(libs.plugins.maven.publish.plugin)
 }
 
 android {
@@ -15,19 +17,27 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
-
     buildTypes {
+        debug {
+            println "<<<--- Building library --->>> buildTypes debug"
+            it.buildConfigField 'String', 'DEBUG_API_HOST', "\"DEBUG host >>>\""
+        }
         release {
+            println "<<<--- Building library --->>> buildTypes release"
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            it.buildConfigField 'String', 'DEBUG_API_HOST', "\"Release host >>>\""
         }
     }
+    buildFeatures {
+        buildConfig true
+    }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = '11'
+        jvmTarget = '17'
     }
 }
 
@@ -40,36 +50,49 @@ dependencies {
     androidTestImplementation libs.androidx.espresso.core
 }
 
-project.afterEvaluate {
-    publishing {
-        publications {
-            def artifactName = project.name
-            library(MavenPublication) {
-                groupId 'io.github.iostreamchik.toast'
-                artifactId artifactName
-                version '1.0.0'
-                pom.withXml {
-                    def dependenciesNode = asNode().appendNode("dependencies")
-                    configurations.each {
-                        if (it.name == 'api' || it.name == 'implementation') {
-                            configurations[it.name].allDependencies.forEach {
-                                if (it.group != null && (it.name != null || "unspecified" == it.name)
-                                        && it.version != null && "unspecified" != it.version) {
-                                    println 'dep -->>> ' + it.group + ':' + it.name + ':' + it.version
-                                    def dependencyNode = dependenciesNode.appendNode("dependency")
-                                    dependencyNode.appendNode("groupId", it.group)
-                                    dependencyNode.appendNode("artifactId", it.name)
-                                    dependencyNode.appendNode("version", it.version)
-                                }
-                            }
-                        }
-                    }
-                }
+def lib_groupId = 'io.github.iostreamchik.toast'
+def project_description = "Test Android Library publishing"
+def lib_version = '1.0.6'
+
+mavenPublishing {
+    def releaseBuild = project.gradle.startParameter.taskNames.any {
+        println "<<<--- Building library --->>> TaskName >>> [$it]"
+        it.endsWith("assembleRelease") || it.endsWith("publishToMavenCentral")
+    }
+    def variant = releaseBuild ? "release" : "debug"
+    println "<<<--- Building library --->>> VARIANT [$variant]"
+    publishToMavenCentral(false)
+    configure(new AndroidSingleVariantLibrary(variant, true, true))
+    if (variant == "release") {
+        println '<<<--- Building library --->>> signAllPublications'
+        signAllPublications()
+    }
+
+
+    def artifactName = project.name
+    coordinates(lib_groupId, artifactName, lib_version)
+    pom {
+        name = "Super Toast"
+        description = project_description
+        inceptionYear = "2025"
+        url = "https://github.com/iostreamchik/maven_central"
+        licenses {
+            license {
+                name = "The Apache License, Version 2.0"
+                url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                distribution = "http://www.apache.org/licenses/LICENSE-2.0.txt"
             }
         }
-        repositories {
-            maven {
+        developers {
+            developer {
+                name = "iostreamchik"
+                url = "https://github.com/iostreamchik/"
             }
+        }
+        scm {
+            url = "https://github.com/iostreamchik/maven_central/"
+            connection = "scm:git:git://github.com/iostreamchik/maven_central.git"
+            developerConnection = "scm:git:ssh://git@github.com/iostreamchik/maven_central.git"
         }
     }
 }
