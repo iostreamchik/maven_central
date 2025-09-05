@@ -6,7 +6,7 @@ on:
     tags: [ 'v*' ]  # Trigger on version tags (e.g., v1.0.0)
 
 # Environment variables available to all jobs and steps in this workflow
-env:
+#env:
   # These secrets need to be set in your GitHub repository settings
   # under Settings > Secrets and variables > Actions
 #  OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
