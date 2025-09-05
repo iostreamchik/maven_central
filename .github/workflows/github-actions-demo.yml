@@ -56,7 +56,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'adoptium'
+          distribution: 'temurin'
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
       - name: Create GitHub Release
