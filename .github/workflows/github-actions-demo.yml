@@ -70,22 +70,25 @@ jobs:
           distribution: 'temurin'
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
-      - name: Get release notes
-        id: get_release_notes
-        run: |
-          echo "notes<<EOF" >> $GITHUB_OUTPUT
-          cat release_notes.txt >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+#      - name: Get release notes
+#        id: get_release_notes
+#        run: |
+#          NOTES=$(cat release_notes.txt)
+#          NOTES="${NOTES//'%'/'%25'}"
+#          NOTES="${NOTES//$'\n'/'%0A'}"
+#          NOTES="${NOTES//$'\r'/'%0D'}"
+#          echo "notes=$NOTES" >> $GITHUB_OUTPUT
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           name: Release ${{ github.ref_name }}
           tag_name: ${{ github.ref_name }}
-          body: |
-            ${{ steps.get_release_notes.outputs.notes }}
+#          body: |
+#            ${{ steps.get_release_notes.outputs.notes }}
 #            ## What's Changed
 #            - Update library version to ${{ github.ref_name }}
 #            - Auto-generated release
+          body_path: release_notes.txt
           draft: false
           prerelease: false
 #      - name: Publish to Maven Central
