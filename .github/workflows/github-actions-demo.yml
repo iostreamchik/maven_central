@@ -3,7 +3,7 @@ name: Android CI
 on:
   push:
     tags:
-      - "\d+\.\d+\.\d+"  # Only trigger on version tags like 1.0.0
+      - "^\d+\.\d+\.\d+$"  # Only trigger on version tags like 1.0.0
 
 # Environment variables available to all jobs and steps in this workflow
 #env:
