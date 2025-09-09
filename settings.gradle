@@ -16,10 +16,15 @@ dependencyResolutionManagement {
             url = uri("https://maven.pkg.github.com/iostreamchik/maven_central")
             credentials {
                 def propertiesFile = file("local.properties")
-                def localProperties = new Properties()
-                localProperties.load(new FileInputStream(propertiesFile))
-                username = localProperties['gpr.user'] ?: ""
-                password = localProperties['gpr.key'] ?: ""
+                if (propertiesFile.exists()) {
+                    def localProperties = new Properties()
+                    propertiesFile.withInputStream { localProperties.load(it) }
+                    username = localProperties.getProperty('gpr.user', '')
+                    password = localProperties.getProperty('gpr.key', '')
+                } else {
+                    username = System.getenv("GITHUB_ACTOR") ?: ''
+                    password = System.getenv("GITHUB_TOKEN") ?: ''
+                }
             }
         }
     }
