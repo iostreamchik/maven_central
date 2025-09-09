@@ -67,8 +67,6 @@ mavenPublishing {
         println '<<<--- Building library --->>> signAllPublications'
         signAllPublications()
     }
-
-
     def artifactName = project.name
     coordinates(lib_groupId, artifactName, lib_version)
     pom {
@@ -93,6 +91,21 @@ mavenPublishing {
             url = "https://github.com/iostreamchik/maven_central/"
             connection = "scm:git:git://github.com/iostreamchik/maven_central.git"
             developerConnection = "scm:git:ssh://git@github.com/iostreamchik/maven_central.git"
+        }
+    }
+}
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/iostreamchik/maven_central")
+            credentials {
+//                def propertiesFile = rootProject.file("local.properties")
+//                def localProperties = new Properties()
+//                localProperties.load(new FileInputStream(propertiesFile))
+                username = System.getenv("GITHUB_ACTOR") //localProperties['gpr.user'] ?: ""
+                password = System.getenv("GITHUB_TOKEN") //localProperties['gpr.key'] ?: ""
+            }
         }
     }
 }

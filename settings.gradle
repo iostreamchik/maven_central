@@ -11,6 +11,17 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         mavenLocal()
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/iostreamchik/maven_central")
+            credentials {
+                def propertiesFile = file("local.properties")
+                def localProperties = new Properties()
+                localProperties.load(new FileInputStream(propertiesFile))
+                username = localProperties['gpr.user'] ?: ""
+                password = localProperties['gpr.key'] ?: ""
+            }
+        }
     }
 }
 
