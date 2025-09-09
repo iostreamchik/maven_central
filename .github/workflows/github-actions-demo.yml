@@ -79,6 +79,9 @@ jobs:
           draft: false
           prerelease: false
       - name: Publish to GitHub Packages
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew clean && ./gradlew toast:assembleRelease && ./gradlew toast:publish
 #      - name: Publish to Maven Central
 #        run: |

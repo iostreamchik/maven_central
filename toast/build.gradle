@@ -100,11 +100,8 @@ publishing {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/iostreamchik/maven_central")
             credentials {
-//                def propertiesFile = rootProject.file("local.properties")
-//                def localProperties = new Properties()
-//                localProperties.load(new FileInputStream(propertiesFile))
-                username = System.getenv("GITHUB_ACTOR") //localProperties['gpr.user'] ?: ""
-                password = System.getenv("GITHUB_TOKEN") //localProperties['gpr.key'] ?: ""
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
             }
         }
     }
