@@ -83,7 +83,7 @@ jobs:
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew clean && ./gradlew toast:assembleRelease && ./gradlew toast:publish
+        run: ./gradlew clean && ./gradlew toast:assembleRelease && ./gradlew toast:publishMavenPublicationToGitHubPackagesRepository
 #      - name: Publish to Maven Central
 #        run: |
 #          echo "Publishing version: ${GITHUB_REF#refs/tags/v}"
