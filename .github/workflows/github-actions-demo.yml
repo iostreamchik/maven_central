@@ -53,6 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write  # This is required for creating releases
+      packages: write
     steps:
       - name: Check tag format
         id: check_tag
