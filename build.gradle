@@ -7,5 +7,5 @@ plugins {
 }
 
 ext {
-    libVersion = '1.0.6'
+    libVersion = '1.0.3'
 }
