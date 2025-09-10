@@ -5,17 +5,6 @@ on:
     tags:
       - '[0-9]+.[0-9]+.[0-9]+'  # Only trigger on version tags like 1.0.0
 
-# Environment variables available to all jobs and steps in this workflow
-#env:
-  # These secrets need to be set in your GitHub repository settings
-  # under Settings > Secrets and variables > Actions
-#  OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-#  OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-#  SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
-#  SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
-#  SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
-#  MAVEN_CENTRAL_STAGING_PROFILE_ID: ${{ secrets.MAVEN_CENTRAL_STAGING_PROFILE_ID }}
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -29,10 +18,8 @@ jobs:
           distribution: 'temurin'
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: Test Debug
-        run: ./gradlew toast:testDebug
-      - name: Test Release
-        run: ./gradlew toast:testRelease
+      - name: Test
+        run: ./gradlew toast:lint toast:testDebug toast:testRelease
 
   build:
     needs: test
@@ -49,7 +36,6 @@ jobs:
 
   github_release:
     needs: build
-#    if: startsWith(github.ref, 'refs/tags/') && github.ref_name.matches('\d+\.\d+\.\d+')
     runs-on: ubuntu-latest
     permissions:
       contents: write  # This is required for creating releases
@@ -83,16 +69,10 @@ jobs:
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew clean && ./gradlew toast:assembleRelease && ./gradlew toast:publishMavenPublicationToGitHubPackagesRepository
-#      - name: Publish to Maven Central
-#        run: |
-#          echo "Publishing version: ${GITHUB_REF#refs/tags/v}"
-#          ./gradlew publishToMavenCentral --no-parallel --no-daemon
-#        env:
-#          # These environment variables are used by the maven-publish plugin
-#          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-#          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-#          SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
-#          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
-#          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
-#          MAVEN_CENTRAL_STAGING_PROFILE_ID: ${{ secrets.MAVEN_CENTRAL_STAGING_PROFILE_ID }}
+        run: ./gradlew clean toast:assembleRelease toast:publishMavenPublicationToGitHubPackagesRepository
+      - name: Publish to Maven Central
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.OSSRH_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.OSSRH_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
+        run: ./gradlew clean toast:publishToMavenCentral --no-configuration-cache

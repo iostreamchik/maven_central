@@ -55,18 +55,34 @@ def project_description = "Test Android Library publishing"
 def lib_version = '1.0.6'
 
 mavenPublishing {
-    def releaseBuild = project.gradle.startParameter.taskNames.any {
-        println "<<<--- Building library --->>> TaskName >>> [$it]"
-        it.endsWith("assembleRelease") || it.endsWith("publishToMavenCentral")
+    def tasks = project.gradle.startParameter.taskNames
+
+    def isCentralPublish = tasks.any {
+        it.endsWith("publishToMavenCentral") || it.endsWith("publishMavenPublicationToGitHubPackagesRepository")
     }
+    def isLocalPublish   = tasks.any { it.endsWith("publishToMavenLocal") }
+
+    def releaseBuild = false
+    if (isCentralPublish) {
+        // Always release for Maven Central & GitHub Packages
+        releaseBuild = true
+    } else if (isLocalPublish) {
+        // For MavenLocal, infer from assemble* in the same invocation
+        releaseBuild = tasks.any { it.endsWith("assembleRelease") }
+    }
+
     def variant = releaseBuild ? "release" : "debug"
     println "<<<--- Building library --->>> VARIANT [$variant]"
+
+    // Configure publishing
     publishToMavenCentral(false)
-    configure(new AndroidSingleVariantLibrary(variant, true, true))
+    configure(new AndroidSingleVariantLibrary(variant, true, false))
+
     if (variant == "release") {
         println '<<<--- Building library --->>> signAllPublications'
         signAllPublications()
     }
+
     def artifactName = project.name
     coordinates(lib_groupId, artifactName, lib_version)
     pom {
@@ -94,6 +110,7 @@ mavenPublishing {
         }
     }
 }
+
 publishing {
     repositories {
         maven {
