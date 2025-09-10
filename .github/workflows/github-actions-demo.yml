@@ -35,7 +35,7 @@ jobs:
 #        run: ./gradlew toast:assembleRelease
 
   release:
-    needs: build
+    needs: test
     runs-on: ubuntu-latest
     env:
       GITHUB_ACTOR: ${{ github.actor }}
