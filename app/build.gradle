@@ -34,7 +34,7 @@ android {
 
 dependencies {
 
-    implementation 'io.github.iostreamchik.toast:toast:1.0.6'
+    implementation "io.github.iostreamchik.toast:toast:$rootProject.ext.libVersion"
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
     implementation libs.material

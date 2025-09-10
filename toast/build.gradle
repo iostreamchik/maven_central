@@ -50,9 +50,10 @@ dependencies {
     androidTestImplementation libs.androidx.espresso.core
 }
 
+def lib_version = rootProject.ext.libVersion
+
 def lib_groupId = 'io.github.iostreamchik.toast'
 def project_description = "Test Android Library publishing"
-def lib_version = '1.0.6'
 
 mavenPublishing {
     def tasks = project.gradle.startParameter.taskNames
@@ -60,7 +61,7 @@ mavenPublishing {
     def isCentralPublish = tasks.any {
         it.endsWith("publishToMavenCentral") || it.endsWith("publishMavenPublicationToGitHubPackagesRepository")
     }
-    def isLocalPublish   = tasks.any { it.endsWith("publishToMavenLocal") }
+    def isLocalPublish = tasks.any { it.endsWith("publishToMavenLocal") }
 
     def releaseBuild = false
     if (isCentralPublish) {

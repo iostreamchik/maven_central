@@ -12,29 +12,29 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '17'
           distribution: 'temurin'
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Test
-        run: ./gradlew toast:lint toast:testDebug toast:testRelease
+        run: ./gradlew clean toast:lint toast:test
 
-  build:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-      - name: Build with Gradle
-        run: ./gradlew toast:build
+#  build:
+#    needs: test
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v5
+#      - name: Set up JDK 17
+#        uses: actions/setup-java@v5
+#        with:
+#          java-version: '17'
+#          distribution: 'temurin'
+#      - name: Build with Gradle
+#        run: ./gradlew toast:assembleRelease
 
-  github_release:
+  release:
     needs: build
     runs-on: ubuntu-latest
     env:
@@ -58,7 +58,7 @@ jobs:
       - uses: actions/checkout@v5
       - name: Set up JDK 17
         if: success()
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -73,6 +73,6 @@ jobs:
           draft: false
           prerelease: false
       - name: Publish to GitHub Packages
-        run: ./gradlew clean toast:assembleRelease toast:publishMavenPublicationToGitHubPackagesRepository
-      - name: Publish to Maven Central
-        run: ./gradlew clean toast:publishToMavenCentral --no-configuration-cache
+        run: ./gradlew clean toast:publishMavenPublicationToGitHubPackagesRepository
+#      - name: Publish to Maven Central
+#        run: ./gradlew clean toast:publishToMavenCentral --no-configuration-cache
