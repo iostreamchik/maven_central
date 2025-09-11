@@ -58,13 +58,13 @@ def project_description = "Test Android Library publishing"
 mavenPublishing {
     def tasks = project.gradle.startParameter.taskNames
 
-    def isCentralPublish = tasks.any {
+    def isReleasePublish = tasks.any {
         it.endsWith("publishToMavenCentral") || it.endsWith("publishMavenPublicationToGitHubPackagesRepository")
     }
     def isLocalPublish = tasks.any { it.endsWith("publishToMavenLocal") }
 
     def releaseBuild = false
-    if (isCentralPublish) {
+    if (isReleasePublish) {
         // Always release for Maven Central & GitHub Packages
         releaseBuild = true
     } else if (isLocalPublish) {
