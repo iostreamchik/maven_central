@@ -33,3 +33,4 @@ dependencyResolutionManagement {
 rootProject.name = "TestLibrary"
 include ':app'
 include ':toast'
+include ':provider'

@@ -1,0 +1,121 @@
+import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
+plugins {
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.signing)
+    alias(libs.plugins.maven.publish.plugin)
+}
+
+android {
+    namespace 'io.github.iostreamchik.provider'
+    compileSdk 35
+
+    defaultConfig {
+        minSdk 24
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = '11'
+    }
+}
+
+dependencies {
+
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.appcompat
+    implementation libs.material
+
+    api "io.github.iostreamchik.toast:toast:$rootProject.ext.libVersion"
+
+    testImplementation libs.junit
+    androidTestImplementation libs.androidx.junit
+    androidTestImplementation libs.androidx.espresso.core
+}
+
+def lib_version = rootProject.ext.libVersion
+
+def lib_groupId = 'io.github.iostreamchik.provider'
+def project_description = "Provider for Test Android Library publishing"
+
+mavenPublishing {
+    def tasks = project.gradle.startParameter.taskNames
+
+    def isCentralPublish = tasks.any {
+        it.endsWith("publishToMavenCentral") || it.endsWith("publishMavenPublicationToGitHubPackagesRepository")
+    }
+    def isLocalPublish = tasks.any { it.endsWith("publishToMavenLocal") }
+
+    def releaseBuild = false
+    if (isCentralPublish) {
+        // Always release for Maven Central & GitHub Packages
+        releaseBuild = true
+    } else if (isLocalPublish) {
+        // For MavenLocal, infer from assemble* in the same invocation
+        releaseBuild = tasks.any { it.endsWith("assembleRelease") }
+    }
+
+    def variant = releaseBuild ? "release" : "debug"
+    println "<<<--- Building library --->>> VARIANT [$variant]"
+
+    // Configure publishing
+    publishToMavenCentral(false)
+    configure(new AndroidSingleVariantLibrary(variant, true, false))
+
+    if (variant == "release") {
+        println '<<<--- Building library --->>> signAllPublications'
+        signAllPublications()
+    }
+
+    def artifactName = project.name
+    coordinates(lib_groupId, artifactName, lib_version)
+    pom {
+        name = "Super Toast"
+        description = project_description
+        inceptionYear = "2025"
+        url = "https://github.com/iostreamchik/maven_central"
+        licenses {
+            license {
+                name = "The Apache License, Version 2.0"
+                url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                distribution = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        }
+        developers {
+            developer {
+                name = "iostreamchik"
+                url = "https://github.com/iostreamchik/"
+            }
+        }
+        scm {
+            url = "https://github.com/iostreamchik/maven_central/"
+            connection = "scm:git:git://github.com/iostreamchik/maven_central.git"
+            developerConnection = "scm:git:ssh://git@github.com/iostreamchik/maven_central.git"
+        }
+    }
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/iostreamchik/maven_central")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+}

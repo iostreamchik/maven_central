@@ -5,12 +5,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import io.github.iostreamchik.provider.Provider
 import io.github.iostreamchik.toast.SuperToast
 
 class Main2Activity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        SuperToast.superToast(this, "Hello ")
+        Provider.provideToast(this, "Hello ")
         enableEdgeToEdge()
         setContentView(R.layout.activity_main2)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->

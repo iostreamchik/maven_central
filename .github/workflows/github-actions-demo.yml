@@ -6,24 +6,9 @@ on:
       - '[0-9]+.[0-9]+.[0-9]+'  # Only trigger on version tags like 1.0.0
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    if: contains(github.ref, 'refs/tags/')
-    steps:
-      - uses: actions/checkout@v5
-      - name: Set up JDK 17
-        uses: actions/setup-java@v5
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-      - name: Test
-        run: ./gradlew clean toast:lint toast:test
-
-#  build:
-#    needs: test
+#  test:
 #    runs-on: ubuntu-latest
+#    if: contains(github.ref, 'refs/tags/')
 #    steps:
 #      - uses: actions/checkout@v5
 #      - name: Set up JDK 17
@@ -31,11 +16,16 @@ jobs:
 #        with:
 #          java-version: '17'
 #          distribution: 'temurin'
-#      - name: Build with Gradle
-#        run: ./gradlew toast:assembleRelease
+#      - name: Grant execute permission for gradlew
+#        run: chmod +x gradlew
+#      - name: Test
+#        run: |
+#          for module in toast provider; do
+#            ./gradlew clean module:lint module:test module:build
+#          done
 
   release:
-    needs: test
+#    needs: test
     runs-on: ubuntu-latest
     env:
       GITHUB_ACTOR: ${{ github.actor }}
@@ -73,6 +63,71 @@ jobs:
           draft: false
           prerelease: false
       - name: Publish to GitHub Packages
-        run: ./gradlew clean toast:publishMavenPublicationToGitHubPackagesRepository
+        run: |
+          for module in toast provider; do
+            ./gradlew clean :$module:lint :$module:test :$module:clean :$module:publishMavenPublicationToGitHubPackagesRepository
+          done
+      - name: Publish to Maven Central
+        run: |
+          for module in toast provider; do
+            ./gradlew clean :$module:publishToMavenCentral --no-configuration-cache
+          done
+
+
+#  test:
+#    runs-on: ubuntu-latest
+#    if: contains(github.ref, 'refs/tags/')
+#    steps:
+#      - uses: actions/checkout@v5
+#      - name: Set up JDK 17
+#        uses: actions/setup-java@v5
+#        with:
+#          java-version: '17'
+#          distribution: 'temurin'
+#      - name: Grant execute permission for gradlew
+#        run: chmod +x gradlew
+#      - name: Test
+#        run: ./gradlew clean toast:lint toast:test
+
+#  release:
+#    needs: test
+#    runs-on: ubuntu-latest
+#    env:
+#      GITHUB_ACTOR: ${{ github.actor }}
+#      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.OSSRH_USERNAME }}
+#      ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.OSSRH_PASSWORD }}
+#      ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
+#      ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_PASSWORD }}
+#    permissions:
+#      contents: write  # This is required for creating releases
+#      packages: write
+#    steps:
+#      - name: Check tag format
+#        id: check_tag
+#        run: |
+#          if [[ ! "${GITHUB_REF_NAME}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+#          echo "Tag ${GITHUB_REF_NAME} is not a semantic version, skipping..."
+#          exit 1
+#          fi
+#      - uses: actions/checkout@v5
+#      - name: Set up JDK 17
+#        if: success()
+#        uses: actions/setup-java@v5
+#        with:
+#          java-version: '17'
+#          distribution: 'temurin'
+#      - name: Setup Gradle
+#        uses: gradle/gradle-build-action@v2
+#      - name: Create GitHub Release
+#        uses: softprops/action-gh-release@v2
+#        with:
+#          name: ${{ github.ref_name }}
+#          tag_name: ${{ github.ref_name }}
+#          body_path: release_notes.txt
+#          draft: false
+#          prerelease: false
+#      - name: Publish to GitHub Packages
+#        run: ./gradlew clean toast:publishMavenPublicationToGitHubPackagesRepository
 #      - name: Publish to Maven Central
 #        run: ./gradlew clean toast:publishToMavenCentral --no-configuration-cache
